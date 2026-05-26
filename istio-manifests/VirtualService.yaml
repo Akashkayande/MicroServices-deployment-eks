@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+
+metadata:
+  name: productcatalogservice-vs
+  namespace: boutique-app
+
+spec:
+  hosts:
+  - productcatalogservice
+
+  http:
+  - name: primary
+
+    route:
+    
+    - destination:
+        host: productcatalogservice-stable
+      weight: 90
+
+    - destination:
+        host: productcatalogservice-canary
+      weight: 10

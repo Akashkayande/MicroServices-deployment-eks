@@ -1,0 +1,54 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: main-rules-alert-config
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  route:
+    repeatInterval: 30m
+    receiver: 'null'
+    routes:
+    - matchers:
+      - name: alertname
+        value: HighCpuUsage
+      receiver: 'send-email'
+    - matchers:
+      - name: alertname
+        value: PodRestart
+      receiver: 'slack-alerts'
+      repeatInterval: 5m
+  receivers:
+  - name: 'send-email'
+    emailConfigs:
+    - to: ramdaskayande637@gmail.com
+      from: ramdaskayande637@gmail.com
+      sendResolved: false
+      smarthost: smtp.gmail.com:587
+      authUsername: ramdaskayande637@gmail.com
+      authIdentity: ramdaskayande637@gmail.com
+      authPassword:
+        name: mail-pass
+        key: gmail-pass
+
+  
+  receivers:
+  - name: slack-alerts
+    slackConfigs:
+    - apiURL:
+        name: alertmanager-slack-secret
+        key: slack_api_url
+      channel: '#monitoring-alerts'
+      sendResolved: true
+      title: |
+        [{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}
+      text: |
+        *Alert:* {{ .CommonLabels.alertname }}
+        *Namespace:* {{ .CommonLabels.namespace }}
+        *Pod:* {{ .CommonLabels.pod }}
+        *Severity:* {{ .CommonLabels.severity }}
+        *Description:* {{ .CommonAnnotations.description }}
+        *Starts At:* {{ .StartsAt }}
+      username: 'alertmanager'
+      iconEmoji: ':rotating_light:'

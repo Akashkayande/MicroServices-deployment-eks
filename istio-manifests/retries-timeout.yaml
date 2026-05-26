@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+
+metadata:
+  name: productcatalog-service
+  namespace: boutique-app
+
+spec:
+  hosts:
+  - productcatalogservice
+
+  http:
+
+  - timeout: 5s
+
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+
+      retryOn: >
+        gateway-error,
+        connect-failure,
+        refused-stream,
+        unavailable,
+        reset,
+        5xx
+
+    route:
+    - destination:
+        host: circuit-breaker

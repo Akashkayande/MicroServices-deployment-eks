@@ -1,0 +1,35 @@
+storage:
+  type: elasticsearch
+  elasticsearch:
+    host: elasticsearch-master.logging.svc  
+    port: 9200
+    scheme: https
+    user: elastic  
+    password: cbTQj1qxRIPNF5uc  
+    tls:
+      enabled: true
+
+
+provisionDataStore:
+  cassandra: false
+  elasticsearch: false
+
+query:
+  cmdlineParams:
+    es.tls.ca: "/tls/ca-cert.pem"
+  extraConfigmapMounts:
+    - name: jaeger-tls
+      mountPath: /tls
+      subPath: ""
+      configMap: jaeger-tls
+      readOnly: true
+
+collector:
+  cmdlineParams:
+    es.tls.ca: "/tls/ca-cert.pem"
+  extraConfigmapMounts:
+    - name: jaeger-tls
+      mountPath: /tls
+      subPath: ""
+      configMap: jaeger-tls
+      readOnly: true

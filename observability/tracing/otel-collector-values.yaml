@@ -1,0 +1,64 @@
+mode: deployment
+
+replicaCount: 2
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+
+config:
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+        http:
+
+  processors:
+
+    memory_limiter:
+      check_interval: 1s
+      limit_mib: 1024
+
+    batch:
+      send_batch_size: 1024
+      timeout: 10s
+
+    probabilistic_sampler:
+      sampling_percentage: 20
+
+    resource:
+      attributes:
+        - key: cluster
+          value: eks-prod
+          action: insert
+
+  exporters:
+
+    otlp:
+      endpoint: jaeger-collector.tracing.svc.cluster.local:4317
+      tls:
+        insecure: true
+
+    logging:
+      loglevel: info
+
+  service:
+
+    pipelines:
+
+      traces:
+        receivers: [otlp]
+        processors:
+          - memory_limiter
+          - batch
+          - probabilistic_sampler
+          - resource
+        exporters: [otlp, logging]
+
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
